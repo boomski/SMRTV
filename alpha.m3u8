@@ -1,0 +1,14 @@
+#EXTM3U
+#EXTINF:-1,Alpha Cyprus
+https://l4.cloudskep.com/alphacyp/acy/playlist.m3u8?wmsAuthSign=c2VydmVyX3RpbWU9My8xNS8yMDI2IDU6MjA6MTMgUE0maGFzaF92YWx1ZT1aSUlGTEpRSGVPRXRxUStsa0N6UXdBPT0mdmFsaWRtaW51dGVzPTMw',
+  };
+  var ad_tag_url = 'https://pubads.g.doubleclick.net/gampad/live/ads?iu=/21763091858/alphacyprus.com.cy/alphacyprus_videoads_live&description_url=[placeholder]&tfcd=0&npa=0&sz=400x300%7C640x480&gdfp_req=1&output=vast&unviewed_position_start=1&env=vp&impl=s&correlator=';  
+  var schedule = {
+    preroll: ad_tag_url,
+    midroll: [
+      ['50%', ad_tag_url]
+    ],
+    postroll: ad_tag_url
+  };
+  var settings = {
+    licenseKey: 
