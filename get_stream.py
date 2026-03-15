@@ -1,28 +1,35 @@
 from playwright.sync_api import sync_playwright
-import re
 
 URL = "https://www.alphacyprus.com.cy/live"
+
+stream_url = None
 
 with sync_playwright() as p:
     browser = p.firefox.launch(headless=True)
     page = browser.new_page()
 
-    page.goto(URL, wait_until="networkidle")
+    def handle_request(request):
+        global stream_url
+        url = request.url
+        if "playlist.m3u8" in url and "wmsAuthSign" in url:
+            stream_url = url
 
-    html = page.content()
+    page.on("request", handle_request)
+
+    page.goto(URL)
+    page.wait_for_timeout(5000)
 
     browser.close()
 
-match = re.search(r'https://l4\.cloudskep\.com/alphacyp/acy/playlist\.m3u8\?wmsAuthSign=[^\'"]+', html)
-
-if match:
-    stream = match.group(0)
-
-    playlist = "#EXTM3U\n#EXTINF:-1,Alpha Cyprus\n" + stream
+if stream_url:
+    playlist = f"""#EXTM3U
+#EXTINF:-1,Alpha Cyprus
+{stream_url}
+"""
 
     with open("alpha.m3u8", "w") as f:
         f.write(playlist)
 
-    print("Nieuwe stream:", stream)
+    print("Echte stream:", stream_url)
 else:
-    print("Stream niet gevonden")
+    print("Geen stream gevonden")
