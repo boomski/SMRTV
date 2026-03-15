@@ -23,13 +23,16 @@ with sync_playwright() as p:
 
 if stream_url:
     playlist = f"""#EXTM3U
-#EXTINF:-1,Alpha Cyprus
+#EXTINF:-1 tvg-name="Alpha Cyprus",Alpha Cyprus
+#EXTVLCOPT:http-referrer=https://www.alphacyprus.com.cy/
+#EXTVLCOPT:http-origin=https://www.alphacyprus.com.cy
 {stream_url}
 """
 
     with open("alpha.m3u8", "w") as f:
         f.write(playlist)
 
-    print("Echte stream:", stream_url)
+    print("Stream gevonden:", stream_url)
+
 else:
     print("Geen stream gevonden")
