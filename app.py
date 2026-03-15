@@ -14,56 +14,37 @@ HEADERS = {
 
 def get_master():
     r = requests.get(MASTER_URL, headers=HEADERS)
+    r.raise_for_status()
     return r.text
 
-def extract(master, quality):
-
+def extract_fhd(master):
     for line in master.splitlines():
-
-        if quality in line and "chunks.m3u8" in line:
+        if "/fhd/" in line and "chunks.m3u8" in line:
             return line
 
-def rewrite(content, base):
+def fetch_playlist(url):
+    r = requests.get(url, headers=HEADERS)
+    r.raise_for_status()
+    return r.text
 
-    base_url = base.rsplit("/",1)[0] + "/"
+def rewrite_playlist(content, base_url):
+    base = base_url.rsplit("/",1)[0] + "/"
     lines = []
-
     for line in content.splitlines():
-
-        if line.startswith("#"):
+        if line.startswith("#") or line.strip() == "":
             lines.append(line)
-
         else:
-            lines.append(urljoin(base_url, line))
-
+            # Absolute URL voor VLC
+            lines.append(urljoin(base, line))
     return "\n".join(lines)
 
-@app.route("/live/<quality>.m3u8")
-def stream(quality):
-
+@app.route("/live.m3u8")
+def stream():
     master = get_master()
-
-    stream = extract(master, quality)
-
-    r = requests.get(stream, headers=HEADERS)
-
-    playlist = rewrite(r.text, stream)
-
-    return Response(playlist, mimetype="application/vnd.apple.mpegurl")
-
-
-@app.route("/iptv.m3u")
-def iptv():
-
-    return """
-#EXTM3U
-#EXTINF:-1,Alpha Cyprus FHD
-http://localhost:8080/live/fhd.m3u8
-#EXTINF:-1,Alpha Cyprus HD
-http://localhost:8080/live/hd.m3u8
-#EXTINF:-1,Alpha Cyprus SD
-http://localhost:8080/live/sd.m3u8
-"""
+    fhd = extract_fhd(master)
+    playlist = fetch_playlist(fhd)
+    fixed = rewrite_playlist(playlist, fhd)
+    return Response(fixed, mimetype="application/vnd.apple.mpegurl")
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080)
